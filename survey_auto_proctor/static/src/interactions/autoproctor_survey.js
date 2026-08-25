@@ -5,8 +5,6 @@ import { rpc } from "@web/core/network/rpc";
 import { loadJS } from "@web/core/assets";
 
 
-const CLIENT_ID = 'alD5CxBT'
-const CLIENT_SECRET = 'gexcTV6jcboEqYa' 
 // const AUTOPROCTOR_SDK_URL = "https://cdn.autoproctor.co/ap-entry.js";
 
 publicWidget.registry.AutoProctor = publicWidget.Widget.extend({
@@ -43,16 +41,6 @@ publicWidget.registry.AutoProctor = publicWidget.Widget.extend({
             await this._initAndStartAutoProctor();
         }
     },
-    async computeHash(message, secret) {
-        const enc = new TextEncoder()
-        const key = await crypto.subtle.importKey(
-            'raw', enc.encode(secret),
-            { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-        )
-        const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message))
-        return btoa(String.fromCharCode(...new Uint8Array(sig)))
-    },
-
     /**
      * ثبت listener برای رویدادهای AutoProctor
      */
@@ -126,36 +114,15 @@ publicWidget.registry.AutoProctor = publicWidget.Widget.extend({
             return;
         }
 
-        // ۲. دریافت Credentials از پایتون (تولید HMAC-SHA256 در بک‌اند)
-        async function computeHash(message, secret) {
-            const enc = new TextEncoder()
-            const key = await crypto.subtle.importKey(
-                'raw', enc.encode(secret),
-                { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-            )
-            const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message))
-            return btoa(String.fromCharCode(...new Uint8Array(sig)))
-        }
-
-        const hashedTestAttemptId = await computeHash(this.answerToken, CLIENT_SECRET)
-        const credentials = {
-            clientId: CLIENT_ID,
-            testAttemptId: this.answerToken,
-            hashedTestAttemptId: hashedTestAttemptId
-        }
-        if (!credentials || credentials.error || !credentials.clientId) {
-            console.error("AutoProctor credentials error:", credentials?.error || "Invalid response");
+        // ۲. دریافت Credentials از بک‌اند (تولید HMAC-SHA256 با Secret ذخیره‌شده در سرور)
+        const response = await rpc(
+            `/survey/autoproctor/config/${this.surveyToken}/${this.answerToken}`
+        );
+        if (!response || !response.ok || !response.credentials) {
+            console.error("AutoProctor credentials error:", response?.error || "Invalid response");
             return;
         }
-        console.log("Hashed Attempt id is : ", hashedTestAttemptId)
-        await rpc(
-            `/survey/autoproctor/event/addattemptid`,
-            {
-                'survey_token': this.surveyToken,
-                'answer_token': this.answerToken,
-                'test_attempt_id': hashedTestAttemptId,
-            }
-        );
+        const credentials = response.credentials;
 
         const proctoringOptions = {
             trackingOptions: {

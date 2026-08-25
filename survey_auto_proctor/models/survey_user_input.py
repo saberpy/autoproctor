@@ -8,8 +8,6 @@ import json
 from odoo import _, fields, models
 from odoo.exceptions import UserError
 
-CLIENT_ID = 'alD5CxBT'
-CLIENT_SECRET = 'gexcTV6jcboEqYa'
 
 class SurveyUserInput(models.Model):
     _inherit = "survey.user_input"
