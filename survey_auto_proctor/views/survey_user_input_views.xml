@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="survey_user_input_view_form_autoproctor" model="ir.ui.view">
+        <field name="name">survey.user_input.view.form.autoproctor</field>
+        <field name="model">survey.user_input</field>
+        <field name="inherit_id" ref="survey.survey_user_input_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/field[@name='attempts_count']" position="after">
+                <field name="autoproctor_enabled" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_autoproctor_report"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-shield"
+                        groups="survey.group_survey_manager"
+                        invisible="not autoproctor_enabled or autoproctor_state != 'stopped'">
+                    <field name="autoproctor_state" string="Proctoring Report" widget="statinfo"/>
+                </button>
+                <button name="action_open_autoproctor_report" type="object" title="Proctoring Report" string="Proctoring Report" icon="fa-file-text-o"></button>
+            </xpath>
+            <xpath expr="//page[@name='page_answers']" position="after">
+                <page string="Proctoring"
+                      name="page_autoproctor"
+                      groups="survey.group_survey_manager"
+                      invisible="not autoproctor_enabled">
+                    <group>
+                        <group>
+                            <field name="autoproctor_state" widget="badge"
+                                   decoration-info="autoproctor_state in ['not_started', 'ready']"
+                                   decoration-warning="autoproctor_state == 'active'"
+                                   decoration-success="autoproctor_state == 'stopped'"
+                                   decoration-danger="autoproctor_state == 'error'"/>
+                            <field name="autoproctor_attempt_id"/>
+                        </group>
+                        <group>
+                            <field name="autoproctor_started_at"/>
+                            <field name="autoproctor_stopped_at"/>
+                        </group>
+                    </group>
+                    <group invisible="not autoproctor_last_error">
+                        <field name="autoproctor_last_error"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="survey_user_input_view_list_autoproctor" model="ir.ui.view">
+        <field name="name">survey.user_input.view.list.autoproctor</field>
+        <field name="model">survey.user_input</field>
+        <field name="inherit_id" ref="survey.survey_user_input_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="autoproctor_state"
+                       string="Proctoring"
+                       widget="badge"
+                       optional="hide"
+                       groups="survey.group_survey_manager"
+                       decoration-info="autoproctor_state in ['not_started', 'ready']"
+                       decoration-warning="autoproctor_state == 'active'"
+                       decoration-success="autoproctor_state == 'stopped'"
+                       decoration-danger="autoproctor_state == 'error'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

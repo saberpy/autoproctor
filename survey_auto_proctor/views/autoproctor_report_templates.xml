@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="autoproctor_report_page" name="AutoProctor Report">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-call-assets="survey.survey_assets" lazy_load="True"/>
+            <script src="https://cdn.autoproctor.co/ap-entry.js"></script>
+            <main class="container py-4">
+                <div class="mb-3">
+                    <h1>AutoProctor Report</h1>
+                    <p class="text-muted mb-0">
+                        <span t-field="user_input.survey_id.title"/>
+                        <t t-if="user_input.partner_id">
+                            — <span t-field="user_input.partner_id.name"/>
+                        </t>
+                        <t t-elif="user_input.email">
+                            — <span t-out="user_input.email"/>
+                        </t>
+                    </p>
+                </div>
+                <div class="o_autoproctor_report"
+                     t-att-data-client-id="credentials['clientId']"
+                     t-att-data-test-attempt-id="credentials['testAttemptId']"
+                     t-att-data-hashed-test-attempt-id="credentials['hashedTestAttemptId']">
+                    <div class="o_autoproctor_report_loading alert alert-info" role="status">
+                        Loading the proctoring report…
+                    </div>
+                    <div class="o_autoproctor_report_error alert alert-danger d-none" role="alert"></div>
+                </div>
+            </main>
+        </t>
+    </template>
+</odoo>

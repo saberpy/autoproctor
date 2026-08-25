@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="survey_layout_autoproctor" inherit_id="survey.layout">
+        <xpath expr="//head" position="inside">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+            <script src="https://cdn.autoproctor.co/ap-entry.js"></script>
+        </xpath>
+    </template>
+
+    <template id="survey_fill_form_autoproctor" inherit_id="survey.survey_fill_form">
+        <xpath expr="//form[hasclass('o_survey-fill-form')]" position="attributes">
+            <attribute name="t-att-data-autoproctor-enabled">'1' if survey.autoproctor_enabled and not answer.is_session_answer else '0'</attribute>
+            <attribute name="t-att-data-autoproctor-answer-state">answer.state</attribute>
+            <attribute name="t-att-data-stop-survey-with-autoproctor">'1' if survey.stop_survey_with_autoproctor_report and not answer.is_session_answer else '0'</attribute>
+            <attribute name="t-att-data-autoproctor-stop-score">survey.stop_score</attribute>
+        </xpath>
+        <xpath expr="//form" position="before">
+            <div id="aux-device-container"></div>
+        </xpath>
+        <xpath expr="//div[hasclass('o_survey_form_content')]" position="before">
+            <div t-if="survey.autoproctor_enabled and not answer.is_session_answer"
+                 class="o_autoproctor_status alert alert-info d-none w-100"
+                 role="status"
+                 aria-live="polite"></div>
+            <div t-if="survey.autoproctor_enabled and not answer.is_session_answer"
+                 class="o_autoproctor_resume_gate d-none"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="o_autoproctor_resume_title">
+                <div class="o_autoproctor_resume_card shadow">
+                    <h2 id="o_autoproctor_resume_title">Resume monitored survey</h2>
+                    <p>
+                        Monitoring must be resumed before you can continue this survey.
+                    </p>
+                    <button type="button"
+                            class="btn btn-primary btn-lg o_autoproctor_resume_button">
+                        Resume monitoring
+                    </button>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="survey_fill_form_start_autoproctor" inherit_id="survey.survey_fill_form_start">
+        <xpath expr="//button[@type='submit' and @value='start']" position="before">
+            <div t-if="survey.autoproctor_enabled and not answer.is_session_answer"
+                 class="alert alert-warning o_autoproctor_notice"
+                 role="alert">
+                <strong>This survey is monitored.</strong>
+                Starting it requires access to the camera and microphone. Monitoring must remain active until the final submission.
+            </div>
+        </xpath>
+    </template>
+</odoo>
